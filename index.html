@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Ficha digital interativa de D&D 5E para Percival O Triturador - Paladino Nível 4" />
+  <meta name="theme-color" content="#0a0a12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Percival "O Triturador" — Ficha D&D 5E</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════ STICKY HEADER ═══════════════ -->
+  <header id="sticky-header" class="header">
+    <div class="header__identity">
+      <h1 class="header__name">Percival <span class="header__epithet">"O Triturador"</span></h1>
+      <div class="header__subtitle">
+        <span class="header__class">Paladino <span id="display-level">4</span></span>
+        <span class="db-status-divider">•</span>
+        <div id="db-status" class="db-status db-status--offline" title="Status do Firebase">
+          <span class="db-status__dot"></span>
+          <span class="db-status__text">Offline</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header__stats">
+      <!-- CA -->
+      <div class="header__ac">
+        <span class="header__ac-label">CA</span>
+        <span class="header__ac-value" id="display-ac"></span>
+      </div>
+
+      <!-- HP Interativo -->
+      <div class="header__hp-block">
+        <button class="hp-btn hp-btn--minus" id="btn-hp-minus" aria-label="Reduzir HP">−</button>
+        <div class="hp-display">
+          <span class="hp-display__current" id="display-hp-current"></span>
+          <span class="hp-display__separator">/</span>
+          <span class="hp-display__max" id="display-hp-max"></span>
+          <div class="hp-bar-container">
+            <div class="hp-bar" id="hp-bar"></div>
+          </div>
+        </div>
+        <button class="hp-btn hp-btn--plus" id="btn-hp-plus" aria-label="Aumentar HP">+</button>
+      </div>
+
+      <!-- Descanso Longo -->
+      <button class="btn-rest" id="btn-long-rest" title="Descanso Longo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span>Descanso</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <main id="main-content" class="content">
+
+    <!-- ── ABA COMBATE ── -->
+    <section id="tab-combate" class="tab-panel active" role="tabpanel">
+
+      <!-- Atributos -->
+      <h2 class="section-title">⚔️ Atributos</h2>
+      <div class="attributes-grid" id="attributes-grid">
+        <!-- Renderizado via JS -->
+      </div>
+
+      <!-- Armas -->
+      <h2 class="section-title">🗡️ Armas</h2>
+      <div class="weapons-list" id="weapons-list">
+        <!-- Renderizado via JS -->
+      </div>
+
+      <!-- Habilidade Rápida -->
+      <h2 class="section-title">✨ Habilidades Rápidas</h2>
+      <div class="quick-ability card card--glow">
+        <div class="quick-ability__header">
+          <span class="quick-ability__icon">☀️</span>
+          <div>
+            <h3 class="quick-ability__name">Destruição Divina</h3>
+            <span class="quick-ability__cost">Custa 1 Espaço de Magia</span>
+          </div>
+        </div>
+        <p class="quick-ability__desc">
+          Causa <strong class="damage-tag damage-tag--radiant">+2d8 dano radiante</strong> extra no ataque.<br/>
+          Contra mortos-vivos: <strong class="damage-tag damage-tag--radiant">+3d8 dano radiante</strong>.
+        </p>
+      </div>
+
+    </section>
+
+    <!-- ── ABA CARACTERÍSTICAS ── -->
+    <section id="tab-caracteristicas" class="tab-panel" role="tabpanel">
+
+      <h2 class="section-title">📜 Características & Habilidades</h2>
+
+      <div class="accordion-list">
+
+        <!-- ─── PERÍCIAS & SALVAGUARDAS ─── -->
+        <details class="accordion-item" id="accordion-skills-saves">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">📊</span>
+            <span class="accordion-item__title">Perícias & Salvaguardas</span>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <!-- Salvaguardas -->
+            <h3 class="subsection-title">🛡️ Salvaguardas</h3>
+            <div class="skills-grid" id="saves-list">
+              <!-- Renderizado via JS -->
+            </div>
+
+            <!-- Perícias -->
+            <h3 class="subsection-title" style="margin-top: 18px;">🎯 Perícias</h3>
+            <div class="skills-grid" id="skills-list">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">🔱</span>
+            <span class="accordion-item__title">Maestria em Arma de Haste</span>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <p>Você consegue manter seus inimigos afastados utilizando armas de haste. Você ganha os seguintes benefícios:</p>
+            <p>• Quando você realiza a ação de Ataque e ataca com uma glaive, alabarda ou bordão, você pode usar uma ação bônus para realizar um ataque corpo-a-corpo com a outra extremidade da arma. Esse ataque usa o mesmo modificador de habilidade do ataque primário. O dado de dano da arma para esse ataque é um <strong>1d4</strong> e o ataque causa dano de concussão.</p>
+            <p>• Enquanto você estiver empunhando uma glaive, alabarda, lança longa ou bastão, as outras criaturas provocam um ataque de oportunidade a você quando entrarem no seu alcance.</p>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">⚔️</span>
+            <span class="accordion-item__title">Combate com Armas Grandes</span>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <p>Quando você rolar um 1 ou um 2 num dado de dano de um ataque com arma corpo-a-corpo que você esteja empunhando com duas mãos, você pode rolar o dado novamente e usar a nova rolagem, mesmo que resulte em 1 ou 2. A arma deve ter a propriedade duas mãos ou versátil para ganhar esse benefício.</p>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">🛡️</span>
+            <span class="accordion-item__title">Saúde Divina</span>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <p>A magia divina que flui através de você torna você <strong>imune a doenças</strong>.</p>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">💫</span>
+            <span class="accordion-item__title">Canalizar Divindade</span>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="accordion-item__note" style="margin-top: 0; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+              <span>Uso: 1x por descanso curto ou longo.</span>
+              <label class="trait-slot" style="position: relative; width: 32px; height: 32px; cursor: pointer; user-select: none;">
+                <input type="checkbox" id="checkbox-channel-divinity" checked style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2; margin: 0;" />
+                <div class="trait-slot__visual" style="width: 100%; height: 100%; border: 2px solid var(--gold-dim); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.25s ease; background: transparent;">✦</div>
+              </label>
+            </div>
+            
+            <div class="accordion-list">
+              <details class="accordion-item">
+                <summary class="accordion-item__header" style="padding: 10px;">
+                  <span class="accordion-item__icon">🩸</span>
+                  <span class="accordion-item__title">Absorver Vitalidade</span>
+                  <span class="accordion-chevron">▾</span>
+                </summary>
+                <div class="accordion-item__body" style="padding: 0 10px 10px;">
+                  <p>Você pode usar seu Canalizar Divindade para invocar magia de sangue para absorver parte da vitalidade de um oponente. Com uma ação, você pode tocar uma criatura, que deve ser bem sucedida num teste de salvaguarda de Constituição contra o seu CD de salvaguarda de magia ou ficará impedida.</p>
+                  <p>Enquanto estiver impedida pela falta de vitalidade, a criatura repete o teste de resistência no final de cada turno dela. Se obtiver sucesso, ela se liberta.</p>
+                </div>
+              </details>
+
+              <details class="accordion-item">
+                <summary class="accordion-item__header" style="padding: 10px;">
+                  <span class="accordion-item__icon">🗡️</span>
+                  <span class="accordion-item__title">Bênção de Sangue</span>
+                  <span class="accordion-chevron">▾</span>
+                </summary>
+                <div class="accordion-item__body" style="padding: 0 10px 10px;">
+                  <p>Como uma ação, você pode imbuir uma arma com sangue arcano por 1 minuto, usando seu Canalizar Divindade. Para a duração, você adiciona seu modificador de Carisma as jogadas de ataque feitas com essa arma (bônus mínimo de +1).</p>
+                  <p>No primeiro ataque bem-sucedido com essa arma depois de imbuir ela com sangue, o dano será <strong>Necrótico</strong> e o oponente recebe uma marca de sangue por 1 turno.</p>
+                  <p>Oponentes marcados sofrem dano necrótico extra equivalente a seu modificador de carisma nas suas jogadas de ataque empunhando a arma de sangue, e ao sofrerem esse ataque a marca é removida.</p>
+                  <p>Se um oponente que foi marcado morrer, o seu próximo ataque bem-sucedido com essa arma terá dano Necrótico e aplicará a marca no novo oponente.</p>
+                  <p>A arma também emite luz escarlate num raio de 6 metros e penumbra mais 6 metros além. Se a arma ainda não for mágica, ela se torna mágica por essa duração.</p>
+                  <p>Você pode terminar o efeito no seu turno, como parte de qualquer ação. Se você não estiver mais segurando ou portando a arma, ou estiver inconsciente, esse efeito termina.</p>
+                </div>
+              </details>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">🙏</span>
+            <span class="accordion-item__title">Cura pelas Mãos</span>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+              <div>
+                <strong style="color: var(--hp-green); font-size: 1.2rem;" id="display-lay-on-hands-current"></strong>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">/ <span id="display-lay-on-hands"></span> PV</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="hp-btn hp-btn--minus" id="btn-loh-minus" style="width: 36px; height: 36px; font-size: 1.2rem;">−</button>
+                <button class="hp-btn hp-btn--plus" id="btn-loh-plus" style="width: 36px; height: 36px; font-size: 1.2rem;">+</button>
+              </div>
+            </div>
+            <p>Você possui uma reserva de poder curativo que se recupera após um descanso longo.</p>
+            <p>Como uma ação, você pode tocar uma criatura e drenar poder da reserva para restaurar uma quantidade de pontos de vida a essa criatura. Alternativamente, pode gastar <strong>5 pontos de vida</strong> da reserva para curar o alvo de uma doença ou neutralizar um veneno.</p>
+          </div>
+        </details>
+
+        <details class="accordion-item">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">👁️</span>
+            <span class="accordion-item__title">Sentido Divino</span>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <p>Como uma ação, você pode abrir sua consciência para detectar essas forças. Até o final de seu próximo turno, você sabe a localização de qualquer celestial, corruptor ou morto-vivo a até <strong>18 metros</strong> de você que não esteja com cobertura total.</p>
+            <p class="accordion-item__note">Usos: <span id="display-divine-sense"></span>x por descanso longo (1 + mod. Carisma).</p>
+          </div>
+        </details>
+
+      </div>
+
+    </section>
+
+    <!-- ── ABA MAGIAS ── -->
+    <section id="tab-magias" class="tab-panel" role="tabpanel">
+
+      <!-- Spell Save DC & Attack -->
+      <div class="spell-meta" id="spell-meta">
+        <!-- Renderizado via JS -->
+      </div>
+
+      <!-- Magias Preparadas Info -->
+      <div class="spell-prep-info" id="spell-prep-info">
+        <span class="spell-prep-info__icon">📋</span>
+        <span class="spell-prep-info__text">Magias Preparadas: <strong id="display-prepared-count"></strong></span>
+        <span class="spell-prep-info__formula" id="display-prepared-formula"></span>
+      </div>
+
+      <!-- Spell Slots -->
+      <h2 class="section-title">🔮 Espaços de Magia — 1º Círculo</h2>
+      <div class="spell-slots-container">
+        <div class="spell-slots" id="spell-slots">
+          <!-- Renderizado via JS -->
+        </div>
+        <button class="btn-recover" id="btn-recover-slots">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Recuperar Magias
+        </button>
+      </div>
+
+      <!-- Magias de Juramento -->
+      <h2 class="section-title">🗡️ Magias do Juramento</h2>
+      <div class="accordion-list" style="margin-bottom: 24px;">
+
+        <!-- ─── MARCA DO CAÇADOR ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">🎯</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Marca do Caçador</span>
+              <span class="spell-badge spell-badge--bonus">Ação Bônus</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Adivinhação</span>
+              <span class="spell-tag">Concentração ≤ 1 h</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação bônus</p>
+              <p><strong>Alcance:</strong> 27 metros</p>
+              <p><strong>Componentes:</strong> V</p>
+              <p><strong>Duração:</strong> Concentração, até 1 hora</p>
+            </div>
+            <p>Você escolhe uma criatura que você possa ver dentro do alcance e a marca misticamente como sua presa. Até a magia acabar, você causa <strong>+1d6 dano extra</strong> do mesmo tipo da arma ao alvo sempre que atingi-lo com um ataque com arma, e você tem <strong>vantagem</strong> em qualquer teste de Sabedoria (Percepção) ou Sabedoria (Sobrevivência) que você fizer para encontrá-lo.</p>
+            <p>Se o alvo cair a 0 pontos de vida antes da magia acabar, você pode usar uma ação bônus em um turno subsequente para marcar uma nova criatura.</p>
+            <p class="spell-upcast"><strong>Em Níveis Superiores:</strong> Quando você conjurar essa magia usando um espaço de magia de 3° ou 4° nível, você pode manter sua concentração na magia por até 8 horas. Se usar um espaço de 5° nível ou superior, você pode manter sua concentração por até 24 horas.</p>
+          </div>
+        </details>
+
+        <!-- ─── PERDIÇÃO ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">🩸</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Perdição</span>
+              <span class="spell-badge spell-badge--action">1 Ação</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Encantamento</span>
+              <span class="spell-tag">Concentração ≤ 1 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação</p>
+              <p><strong>Alcance:</strong> 9 metros</p>
+              <p><strong>Componentes:</strong> V, S, M (uma gota de sangue)</p>
+              <p><strong>Duração:</strong> Concentração, até 1 minuto</p>
+            </div>
+            <p>Até três criaturas à sua escolha, que você possa ver dentro do alcance, devem realizar um teste de resistência de <strong>Carisma</strong>. Sempre que um alvo que falhou no teste realizar uma jogada de ataque ou um teste de resistência antes do fim da magia, ele deve rolar um <strong>d4</strong> e subtrair o valor rolado do ataque ou teste de resistência.</p>
+            <p class="spell-upcast"><strong>Em Níveis Superiores:</strong> Quando você conjurar essa magia usando um espaço de magia de 2° nível ou superior, você pode afetar uma criatura adicional para cada nível do espaço acima do 1°.</p>
+          </div>
+        </details>
+      </div>
+
+      <!-- Lista de Magias de Paladino 1º Nível -->
+      <h2 class="section-title">📖 Lista de Magias de Paladino — 1º Nível</h2>
+
+      <div class="accordion-list">
+
+        <!-- ─── AUXÍLIO DIVINO ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">🌟</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Auxílio Divino</span>
+              <span class="spell-badge spell-badge--bonus">Ação Bônus</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Evocação</span>
+              <span class="spell-tag">Concentração ≤ 1 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação bônus</p>
+              <p><strong>Alcance:</strong> Pessoal</p>
+              <p><strong>Componentes:</strong> V</p>
+              <p><strong>Duração:</strong> Concentração, até 1 minuto</p>
+            </div>
+            <p>A próxima vez que você atingir uma criatura com um ataque com arma corpo a corpo antes dessa magia acabar, seu ataque causa <strong class="damage-tag damage-tag--radiant">+1d4 dano radiante</strong> extra ao alvo.</p>
+            <p class="spell-upcast"><strong>Em Níveis Superiores:</strong> Quando você conjurar essa magia usando um espaço de magia de 2° nível ou superior, o dano extra aumenta em 1d4 para cada nível do espaço acima do 1°.</p>
+          </div>
+        </details>
+
+        <!-- ─── BÊNÇÃO ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">✨</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Bênção</span>
+              <span class="spell-badge spell-badge--action">1 Ação</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Encantamento</span>
+              <span class="spell-tag">Concentração ≤ 1 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação</p>
+              <p><strong>Alcance:</strong> 9 metros</p>
+              <p><strong>Componentes:</strong> V, S, M (uma borrifada de água benta)</p>
+              <p><strong>Duração:</strong> Concentração, até 1 minuto</p>
+            </div>
+            <p>Você abençoa até três criaturas, à sua escolha, dentro do alcance. Toda vez que um alvo realizar uma jogada de ataque ou teste de resistência antes da magia acabar, o alvo pode rolar um <strong>d4</strong> e adicionar o número rolado à jogada de ataque ou teste de resistência.</p>
+            <p class="spell-upcast"><strong>Em Níveis Superiores:</strong> Quando você conjurar essa magia usando um espaço de magia de 2° nível ou superior, você pode afetar uma criatura adicional para cada nível do espaço acima do 1°.</p>
+          </div>
+        </details>
+
+        <!-- ─── COMANDO ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">👑</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Comando</span>
+              <span class="spell-badge spell-badge--action">1 Ação</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Encantamento</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação</p>
+              <p><strong>Alcance:</strong> 18 metros</p>
+              <p><strong>Componentes:</strong> V</p>
+              <p><strong>Duração:</strong> 1 rodada</p>
+            </div>
+            <p>Você profere um comando de uma palavra a uma criatura que possa vê-lo dentro do alcance. O alvo deve ser bem-sucedido num teste de resistência de <strong>Sabedoria</strong> ou seguir o comando no próximo turno dele. A magia não tem efeito se o alvo for um morto-vivo, se não entender seu idioma, ou se seu comando for diretamente prejudicial a ele.</p>
+            <p>Alguns comandos típicos e seus efeitos: <strong>Aproximar</strong> — o alvo se move na sua direção pelo caminho mais curto e direto. <strong>Largar</strong> — o alvo larga o que estiver segurando e então encerra o turno. <strong>Fugir</strong> — o alvo gasta seu turno se afastando de você pelo meio mais rápido. <strong>Deitar</strong> — o alvo cai no chão e fica caído. <strong>Parar</strong> — o alvo não se move e não realiza ações.</p>
+            <p class="spell-upcast"><strong>Em Níveis Superiores:</strong> Quando você conjurar essa magia usando um espaço de magia de 2° nível ou superior, você pode afetar uma criatura adicional para cada nível do espaço acima do 1°. As criaturas devem estar a até 9 metros umas das outras quando você as afetar.</p>
+          </div>
+        </details>
+
+        <!-- ─── CURAR FERIMENTOS ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">💚</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Curar Ferimentos</span>
+              <span class="spell-badge spell-badge--action">1 Ação</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Evocação</span>
+              <span class="spell-tag">Toque</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação</p>
+              <p><strong>Alcance:</strong> Toque</p>
+              <p><strong>Componentes:</strong> V, S</p>
+              <p><strong>Duração:</strong> Instantânea</p>
+            </div>
+            <p>Uma criatura que você tocar recupera <strong class="damage-tag damage-tag--heal" id="display-cure-wounds"></strong> pontos de vida. Essa magia não tem efeito em mortos-vivos ou constructos.</p>
+            <p class="spell-upcast"><strong>Em Níveis Superiores:</strong> Quando você conjurar essa magia usando um espaço de magia de 2° nível ou superior, a cura aumenta em 1d8 para cada nível do espaço acima do 1°.</p>
+          </div>
+        </details>
+
+        <!-- ─── DESTRUIÇÃO COLÉRICA ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">🔥</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Destruição Colérica</span>
+              <span class="spell-badge spell-badge--bonus">Ação Bônus</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Evocação</span>
+              <span class="spell-tag">Concentração ≤ 1 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação bônus</p>
+              <p><strong>Alcance:</strong> Pessoal</p>
+              <p><strong>Componentes:</strong> V</p>
+              <p><strong>Duração:</strong> Concentração, até 1 minuto</p>
+            </div>
+            <p>A próxima vez que você acertar com um ataque corpo a corpo com arma durante a duração dessa magia, seu ataque causa <strong class="damage-tag damage-tag--psychic">+1d6 dano psíquico</strong> extra ao alvo. Adicionalmente, se o alvo for uma criatura, ela deve realizar um teste de resistência de <strong>Sabedoria</strong> ou ficará <strong>amedrontada</strong> por você até o final do seu próximo turno.</p>
+          </div>
+        </details>
+
+        <!-- ─── DESTRUIÇÃO LANCINANTE ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">✝️</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Destruição Lancinante</span>
+              <span class="spell-badge spell-badge--bonus">Ação Bônus</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Evocação</span>
+              <span class="spell-tag">Concentração ≤ 1 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação bônus</p>
+              <p><strong>Alcance:</strong> Pessoal</p>
+              <p><strong>Componentes:</strong> V</p>
+              <p><strong>Duração:</strong> Concentração, até 1 minuto</p>
+            </div>
+            <p>A próxima vez que você acertar uma criatura com um ataque corpo a corpo com arma durante a duração desta magia, seu ataque causa <strong class="damage-tag damage-tag--radiant">+1d6 dano radiante</strong> extra ao alvo, que se torna visível se for invisível, e o alvo emite uma luz fraca num raio de 1,5 metro e não pode se tornar invisível até a magia acabar.</p>
+          </div>
+        </details>
+
+        <!-- ─── DESTRUIÇÃO TROVEJANTE ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">⚡</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Destruição Trovejante</span>
+              <span class="spell-badge spell-badge--bonus">Ação Bônus</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Evocação</span>
+              <span class="spell-tag">Concentração ≤ 1 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação bônus</p>
+              <p><strong>Alcance:</strong> Pessoal</p>
+              <p><strong>Componentes:</strong> V</p>
+              <p><strong>Duração:</strong> Concentração, até 1 minuto</p>
+            </div>
+            <p>A primeira vez que você acertar com um ataque corpo a corpo com arma durante a duração dessa magia, sua arma emite um estrondo trovejante audível a até 90 metros e o ataque causa <strong class="damage-tag damage-tag--thunder">+2d6 dano trovejante</strong> extra ao alvo.</p>
+            <p>Além disso, se o alvo for uma criatura, ele deve ter sucesso em um teste de resistência de <strong>Força</strong> ou ser empurrado 3 metros para longe de você e ficar <strong>caído</strong>.</p>
+          </div>
+        </details>
+
+        <!-- ─── DETECTAR O BEM E MAL ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">👁️</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Detectar o Bem e Mal</span>
+              <span class="spell-badge spell-badge--action">1 Ação</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Adivinhação</span>
+              <span class="spell-tag">Concentração ≤ 10 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação</p>
+              <p><strong>Alcance:</strong> Pessoal</p>
+              <p><strong>Componentes:</strong> V, S</p>
+              <p><strong>Duração:</strong> Concentração, até 10 minutos</p>
+            </div>
+            <p>Pela duração, você sabe se existe uma aberração, celestial, elemental, fada, corruptor ou morto-vivo a até <strong>9 metros</strong> de você, assim como onde a criatura está localizada. Similarmente, você sabe se existe um lugar ou objeto a até 9 metros de você que tenha sido consagrado ou profanado magicamente.</p>
+            <p>A magia pode penetrar na maioria das barreiras, mas é bloqueada por 30 cm de pedra, 2,5 cm de metal comum, uma fina camada de chumbo, ou 90 cm de madeira ou terra.</p>
+          </div>
+        </details>
+
+        <!-- ─── DETECTAR MAGIA ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">🔮</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Detectar Magia</span>
+              <span class="spell-badge spell-badge--action">1 Ação</span>
+              <span class="spell-badge spell-badge--ritual">Ritual</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Adivinhação</span>
+              <span class="spell-tag">Ritual</span>
+              <span class="spell-tag">Concentração ≤ 10 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação</p>
+              <p><strong>Alcance:</strong> Pessoal</p>
+              <p><strong>Componentes:</strong> V, S</p>
+              <p><strong>Duração:</strong> Concentração, até 10 minutos</p>
+            </div>
+            <p>Pela duração, você sente a presença de magia a até <strong>9 metros</strong> de você. Se sentir magia dessa forma, você pode usar sua ação para ver uma aura fraca em volta de qualquer criatura ou objeto visível na área que tenha magia, e você descobre a <strong>escola de magia</strong> dela, se houver.</p>
+            <p>A magia pode penetrar na maioria das barreiras, mas é bloqueada por 30 cm de pedra, 2,5 cm de metal comum, uma fina camada de chumbo, ou 90 cm de madeira ou terra.</p>
+          </div>
+        </details>
+
+        <!-- ─── DETECTAR VENENO E DOENÇA ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">☠️</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Detectar Veneno e Doença</span>
+              <span class="spell-badge spell-badge--action">1 Ação</span>
+              <span class="spell-badge spell-badge--ritual">Ritual</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Adivinhação</span>
+              <span class="spell-tag">Ritual</span>
+              <span class="spell-tag">Concentração ≤ 10 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação</p>
+              <p><strong>Alcance:</strong> Pessoal</p>
+              <p><strong>Componentes:</strong> V, S, M (uma folha de teixo)</p>
+              <p><strong>Duração:</strong> Concentração, até 10 minutos</p>
+            </div>
+            <p>Pela duração, você pode sentir a presença e a localização de venenos, criaturas venenosas e doenças a até <strong>9 metros</strong> de você. Você também identifica o tipo de veneno, criatura venenosa ou doença em cada caso.</p>
+            <p>A magia pode penetrar na maioria das barreiras, mas é bloqueada por 30 cm de pedra, 2,5 cm de metal comum, uma fina camada de chumbo, ou 90 cm de madeira ou terra.</p>
+          </div>
+        </details>
+
+        <!-- ─── DUELO COMPELIDO ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">⚔️</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Duelo Compelido</span>
+              <span class="spell-badge spell-badge--bonus">Ação Bônus</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Encantamento</span>
+              <span class="spell-tag">Concentração ≤ 1 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação bônus</p>
+              <p><strong>Alcance:</strong> 9 metros</p>
+              <p><strong>Componentes:</strong> V</p>
+              <p><strong>Duração:</strong> Concentração, até 1 minuto</p>
+            </div>
+            <p>Você tenta compelir uma criatura a duelar com você. Uma criatura que você possa ver dentro do alcance deve fazer um teste de resistência de <strong>Sabedoria</strong>. Se falhar, a criatura é atraída por você, compelida pela sua exigência divina. Pela duração, ela tem <strong>desvantagem</strong> em jogadas de ataque contra criaturas que não sejam você, e deve fazer um teste de resistência de Sabedoria cada vez que tentar se mover para um espaço que esteja a mais de 9 metros de você; se for bem-sucedida nesse teste de resistência, essa magia não restringe o movimento do alvo naquele turno.</p>
+            <p>A magia termina se você atacar qualquer outra criatura, se você conjurar uma magia que afete uma criatura hostil que não seja o alvo, se uma criatura aliada causar dano ao alvo ou conjurar uma magia prejudicial nele, ou se você terminar seu turno a mais de 9 metros do alvo.</p>
+          </div>
+        </details>
+
+        <!-- ─── ESCUDO DA FÉ ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">🛡️</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Escudo da Fé</span>
+              <span class="spell-badge spell-badge--bonus">Ação Bônus</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Abjuração</span>
+              <span class="spell-tag">Concentração ≤ 10 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação bônus</p>
+              <p><strong>Alcance:</strong> 18 metros</p>
+              <p><strong>Componentes:</strong> V, S, M (um pequeno pergaminho com um texto sagrado escrito)</p>
+              <p><strong>Duração:</strong> Concentração, até 10 minutos</p>
+            </div>
+            <p>Um campo de luz cintilante envolve uma criatura à sua escolha dentro do alcance, concedendo-lhe um <strong>bônus de +2 na CA</strong> pela duração.</p>
+          </div>
+        </details>
+
+        <!-- ─── HEROÍSMO ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">💪</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Heroísmo</span>
+              <span class="spell-badge spell-badge--action">1 Ação</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Encantamento</span>
+              <span class="spell-tag">Concentração ≤ 1 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação</p>
+              <p><strong>Alcance:</strong> Toque</p>
+              <p><strong>Componentes:</strong> V, S</p>
+              <p><strong>Duração:</strong> Concentração, até 1 minuto</p>
+            </div>
+            <p>Uma criatura voluntária que você tocar é imbuída com bravura. Até a magia acabar, a criatura é <strong>imune à condição amedrontado</strong> e ganha <strong>pontos de vida temporários</strong> iguais ao seu modificador de habilidade de conjuração no início de cada um dos turnos dela. Quando a magia acabar, o alvo perde quaisquer pontos de vida temporários restantes dessa magia.</p>
+            <p class="spell-upcast"><strong>Em Níveis Superiores:</strong> Quando você conjurar essa magia usando um espaço de magia de 2° nível ou superior, você pode afetar uma criatura adicional para cada nível do espaço acima do 1°.</p>
+          </div>
+        </details>
+
+        <!-- ─── PROTEÇÃO CONTRA O BEM E MAL ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">🔰</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Proteção contra o Bem e Mal</span>
+              <span class="spell-badge spell-badge--action">1 Ação</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Abjuração</span>
+              <span class="spell-tag">Concentração ≤ 10 min</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação</p>
+              <p><strong>Alcance:</strong> Toque</p>
+              <p><strong>Componentes:</strong> V, S, M (água benta ou pó de prata e ferro, que a magia consome)</p>
+              <p><strong>Duração:</strong> Concentração, até 10 minutos</p>
+            </div>
+            <p>Até a magia acabar, uma criatura voluntária que você tocar é protegida contra certos tipos de criaturas: aberrações, celestiais, elementais, fadas, corruptores e mortos-vivos.</p>
+            <p>A proteção garante vários benefícios. Criaturas desses tipos têm <strong>desvantagem</strong> em jogadas de ataque contra o alvo. O alvo também não pode ser <strong>enfeitiçado, amedrontado ou possuído</strong> por elas. Se o alvo já estiver enfeitiçado, amedrontado ou possuído por uma dessas criaturas, o alvo tem <strong>vantagem</strong> no novo teste de resistência contra o efeito relevante.</p>
+          </div>
+        </details>
+
+        <!-- ─── PURIFICAR ALIMENTOS ─── -->
+        <details class="accordion-item accordion-item--spell">
+          <summary class="accordion-item__header">
+            <span class="accordion-item__icon">🍞</span>
+            <div class="spell-summary">
+              <span class="accordion-item__title">Purificar Alimentos</span>
+              <span class="spell-badge spell-badge--action">1 Ação</span>
+              <span class="spell-badge spell-badge--ritual">Ritual</span>
+            </div>
+            <span class="accordion-chevron">▾</span>
+          </summary>
+          <div class="accordion-item__body">
+            <div class="spell-tags">
+              <span class="spell-tag">1º Círculo</span>
+              <span class="spell-tag">Transmutação</span>
+              <span class="spell-tag">Ritual</span>
+            </div>
+            <div class="spell-details">
+              <p><strong>Tempo de Conjuração:</strong> 1 ação</p>
+              <p><strong>Alcance:</strong> 3 metros</p>
+              <p><strong>Componentes:</strong> V, S</p>
+              <p><strong>Duração:</strong> Instantânea</p>
+            </div>
+            <p>Toda comida e bebida não-mágica dentro de uma esfera de <strong>1,5 metro</strong> de raio centrada num ponto à sua escolha dentro do alcance é purificada e livre de venenos e doenças.</p>
+          </div>
+        </details>
+
+      </div>
+
+    </section>
+
+    <!-- ── ABA INVENTÁRIO ── -->
+    <section id="tab-inventario" class="tab-panel" role="tabpanel">
+
+      <!-- Dinheiro (PO) -->
+      <h2 class="section-title">🪙 Moedas & Riquezas</h2>
+      <div class="card card--glow po-card" style="margin-bottom: 20px;">
+        <div class="po-container">
+          <div class="po-info">
+            <span class="po-icon">🪙</span>
+            <div>
+              <h3 class="po-title">Peças de Ouro (PO)</h3>
+              <span class="po-subtitle">Dinheiro Livre</span>
+            </div>
+          </div>
+          <div class="po-input-wrapper">
+            <input type="number" id="input-po" class="po-input" placeholder="0" min="0" />
+            <span class="po-suffix">PO</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de Itens -->
+      <h2 class="section-title">🎒 Itens & Equipamentos</h2>
+      <div class="card inventory-card">
+        <!-- Form para adicionar item -->
+        <form id="add-item-form" class="inventory-form-vertical">
+          <div class="inventory-form-row">
+            <input type="text" id="input-item-name" class="inventory-input" placeholder="Nome do item..." required style="flex: 1;" />
+            <button type="submit" class="btn-add-item">Adicionar</button>
+          </div>
+          <textarea id="input-item-desc" class="inventory-textarea" placeholder="Descrição ou propriedades do item (opcional)..." rows="2"></textarea>
+        </form>
+        
+        <!-- Lista container -->
+        <ul id="inventory-list" class="inventory-list">
+          <!-- Renderizado via JS -->
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════ BOTTOM TAB BAR ═══════════════ -->
+  <nav id="bottom-nav" class="bottom-nav" role="tablist">
+    <button class="bottom-nav__tab active" data-tab="combate" role="tab" aria-selected="true" id="nav-combate">
+      <svg class="bottom-nav__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 7.5l4-4 4 4-4 4"/><path d="m5.5 14.5 4 4"/></svg>
+      <span>Combate</span>
+    </button>
+    <button class="bottom-nav__tab" data-tab="caracteristicas" role="tab" aria-selected="false" id="nav-caracteristicas">
+      <svg class="bottom-nav__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <span>Traços</span>
+    </button>
+    <button class="bottom-nav__tab" data-tab="magias" role="tab" aria-selected="false" id="nav-magias">
+      <svg class="bottom-nav__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>Magias</span>
+    </button>
+    <button class="bottom-nav__tab" data-tab="inventario" role="tab" aria-selected="false" id="nav-inventario">
+      <svg class="bottom-nav__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      <span>Inventário</span>
+    </button>
+  </nav>
+
+  <!-- ═══════════════ MODAL HP INPUT ═══════════════ -->
+  <div class="modal-overlay" id="hp-modal" aria-hidden="true">
+    <div class="modal">
+      <div class="modal__header">
+        <span class="modal__icon" id="hp-modal-icon">💔</span>
+        <h2 class="modal__title" id="hp-modal-title">Dano Recebido</h2>
+      </div>
+      <p class="modal__hint" id="hp-modal-hint">Quanto dano o Percival tomou?</p>
+      <input
+        type="number"
+        class="modal__input"
+        id="hp-modal-input"
+        min="0"
+        placeholder="0"
+        inputmode="numeric"
+        autofocus
+      />
+      <div class="modal__actions">
+        <button class="modal__btn modal__btn--cancel" id="hp-modal-cancel">Cancelar</button>
+        <button class="modal__btn modal__btn--confirm" id="hp-modal-confirm">Aplicar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
