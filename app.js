@@ -68,13 +68,9 @@ const CHAR = {
     skills: ['Acrobacia', 'Atletismo', 'Intimidação', 'Percepção', 'Persuasão']
   },
 
-  // HP máximo base: (1d10 por nível) + (CON mod × nível)
-  // Nível 1: 10 + 2 = 12
-  // Níveis 2-4: média(6) + 2 = 8 cada = 24
-  // Total: 12 + 24 + bonus = 42 (conforme especificado)
+  // HP máximo base do personagem
   hpMax: 42,
 
-  // CA (Classe de Armadura)
   // Exemplo: Cota de malha (16) + escudo (0) + outro(1) = 17
   armorClassBase: 17,
 
@@ -207,14 +203,36 @@ const STORAGE_KEYS = {
   INVENTORY: 'dnd_percival_inventory'       // Lista de itens do inventário (array de strings)
 };
 
+function normalizeNumber(value, fallback, min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY) {
+  const parsed = Number(value);
+  const fallbackNumber = Number(fallback);
+  const safeFallback = Number.isFinite(fallbackNumber)
+    ? fallbackNumber
+    : (Number.isFinite(min) ? min : 0);
+  const candidate = Number.isFinite(parsed) ? parsed : safeFallback;
+  return Math.max(min, Math.min(max, candidate));
+}
+
+function normalizeBoolean(value, fallback = false) {
+  if (typeof value === 'boolean') return value;
+  if (value === 'true' || value === 1 || value === '1') return true;
+  if (value === 'false' || value === 0 || value === '0') return false;
+  return fallback;
+}
+
+function normalizeArray(value, fallback) {
+  return Array.isArray(value) ? value : fallback;
+}
+
 /**
  * Salva o HP e sincroniza com o Firestore
  */
 async function saveHP(value) {
-  localStorage.setItem(STORAGE_KEYS.HP, String(value));
+  const safeValue = normalizeNumber(value, CHAR.hpMax, 0, CHAR.hpMax);
+  localStorage.setItem(STORAGE_KEYS.HP, String(safeValue));
   if (syncEnabled && db) {
     try {
-      await updateDoc(doc(db, "characters", "percival"), { hp: value });
+      await updateDoc(doc(db, "characters", "percival"), { hp: safeValue });
     } catch (e) {
       console.error("Erro ao sincronizar HP no Firestore:", e);
     }
@@ -233,10 +251,17 @@ function loadHP() {
  * Salva o estado dos slots e sincroniza com o Firestore
  */
 async function saveSlots(slotsArray) {
-  localStorage.setItem(STORAGE_KEYS.SLOTS, JSON.stringify(slotsArray));
+  const safeSlots = normalizeArray(slotsArray, new Array(CHAR.spellSlots[1]).fill(true))
+    .slice(0, CHAR.spellSlots[1])
+    .map(Boolean);
+  while (safeSlots.length < CHAR.spellSlots[1]) {
+    safeSlots.push(true);
+  }
+
+  localStorage.setItem(STORAGE_KEYS.SLOTS, JSON.stringify(safeSlots));
   if (syncEnabled && db) {
     try {
-      await updateDoc(doc(db, "characters", "percival"), { slots: slotsArray });
+      await updateDoc(doc(db, "characters", "percival"), { slots: safeSlots });
     } catch (e) {
       console.error("Erro ao sincronizar slots no Firestore:", e);
     }
@@ -263,10 +288,11 @@ function loadSlots() {
  * Salva o estado do Canalizar Divindade e sincroniza com o Firestore
  */
 async function saveChannelDivinity(isAvailable) {
-  localStorage.setItem(STORAGE_KEYS.CHANNEL_DIV, isAvailable ? 'true' : 'false');
+  const safeValue = normalizeBoolean(isAvailable, true);
+  localStorage.setItem(STORAGE_KEYS.CHANNEL_DIV, safeValue ? 'true' : 'false');
   if (syncEnabled && db) {
     try {
-      await updateDoc(doc(db, "characters", "percival"), { channelDiv: isAvailable });
+      await updateDoc(doc(db, "characters", "percival"), { channelDiv: safeValue });
     } catch (e) {
       console.error("Erro ao sincronizar Canalizar Divindade no Firestore:", e);
     }
@@ -283,10 +309,11 @@ function loadChannelDivinity() {
  * Salva a reserva de Cura pelas Mãos (LOH) e sincroniza com o Firestore
  */
 async function saveLOH(value) {
-  localStorage.setItem(STORAGE_KEYS.LOH, String(value));
+  const safeValue = normalizeNumber(value, getLayOnHandsPool(), 0, getLayOnHandsPool());
+  localStorage.setItem(STORAGE_KEYS.LOH, String(safeValue));
   if (syncEnabled && db) {
     try {
-      await updateDoc(doc(db, "characters", "percival"), { loh: value });
+      await updateDoc(doc(db, "characters", "percival"), { loh: safeValue });
     } catch (e) {
       console.error("Erro ao sincronizar LOH no Firestore:", e);
     }
@@ -306,10 +333,11 @@ function loadLOH() {
  * Salva a quantidade de ouro (PO) e sincroniza com o Firestore
  */
 async function savePO(value) {
-  localStorage.setItem(STORAGE_KEYS.PO, String(value));
+  const safeValue = normalizeNumber(value, 0, 0, Number.POSITIVE_INFINITY);
+  localStorage.setItem(STORAGE_KEYS.PO, String(safeValue));
   if (syncEnabled && db) {
     try {
-      await updateDoc(doc(db, "characters", "percival"), { po: value });
+      await updateDoc(doc(db, "characters", "percival"), { po: safeValue });
     } catch (e) {
       console.error("Erro ao sincronizar PO no Firestore:", e);
     }
@@ -327,10 +355,11 @@ function loadPO() {
  * Salva a lista de itens e sincroniza com o Firestore
  */
 async function saveInventory(itemsArray) {
-  localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(itemsArray));
+  const safeItems = normalizeArray(itemsArray, []);
+  localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(safeItems));
   if (syncEnabled && db) {
     try {
-      await updateDoc(doc(db, "characters", "percival"), { inventory: itemsArray });
+      await updateDoc(doc(db, "characters", "percival"), { inventory: safeItems });
     } catch (e) {
       console.error("Erro ao sincronizar inventário no Firestore:", e);
     }
@@ -380,12 +409,12 @@ async function syncStateToFirestore(forceUpload = false) {
   try {
     const docRef = doc(db, "characters", "percival");
     const dataToSave = {
-      hp: currentHP,
-      slots: currentSlots,
-      channelDiv: channelDivAvailable,
-      loh: currentLOH,
-      po: currentPO,
-      inventory: currentInventory,
+      hp: normalizeNumber(currentHP, CHAR.hpMax, 0, CHAR.hpMax),
+      slots: normalizeArray(currentSlots, new Array(CHAR.spellSlots[1]).fill(true)).slice(0, CHAR.spellSlots[1]).map(Boolean),
+      channelDiv: normalizeBoolean(channelDivAvailable, true),
+      loh: normalizeNumber(currentLOH, getLayOnHandsPool(), 0, getLayOnHandsPool()),
+      po: normalizeNumber(currentPO, 0, 0, Number.POSITIVE_INFINITY),
+      inventory: normalizeArray(currentInventory, []),
       updatedAt: new Date().toISOString()
     };
     await setDoc(docRef, dataToSave, { merge: true });
@@ -428,7 +457,7 @@ function initRealtimeSync() {
 
       // Sincroniza HP
       if (data.hp !== undefined && data.hp !== currentHP) {
-        currentHP = Math.max(0, Math.min(CHAR.hpMax, data.hp));
+        currentHP = normalizeNumber(data.hp, CHAR.hpMax, 0, CHAR.hpMax);
         localStorage.setItem(STORAGE_KEYS.HP, String(currentHP));
         updateHPDisplay();
         needsRender = true;
@@ -436,7 +465,10 @@ function initRealtimeSync() {
 
       // Sincroniza Slots
       if (data.slots !== undefined && JSON.stringify(data.slots) !== JSON.stringify(currentSlots)) {
-        currentSlots = data.slots;
+        currentSlots = normalizeArray(data.slots, new Array(CHAR.spellSlots[1]).fill(true)).slice(0, CHAR.spellSlots[1]).map(Boolean);
+        while (currentSlots.length < CHAR.spellSlots[1]) {
+          currentSlots.push(true);
+        }
         localStorage.setItem(STORAGE_KEYS.SLOTS, JSON.stringify(currentSlots));
         renderSpellSlots();
         needsRender = true;
@@ -444,7 +476,7 @@ function initRealtimeSync() {
 
       // Sincroniza Canalizar Divindade
       if (data.channelDiv !== undefined && data.channelDiv !== channelDivAvailable) {
-        channelDivAvailable = data.channelDiv;
+        channelDivAvailable = normalizeBoolean(data.channelDiv, true);
         localStorage.setItem(STORAGE_KEYS.CHANNEL_DIV, channelDivAvailable ? 'true' : 'false');
         const cbCD = document.getElementById('checkbox-channel-divinity');
         if (cbCD) cbCD.checked = channelDivAvailable;
@@ -453,7 +485,7 @@ function initRealtimeSync() {
 
       // Sincroniza Cura pelas Mãos (LOH)
       if (data.loh !== undefined && data.loh !== currentLOH) {
-        currentLOH = data.loh;
+        currentLOH = normalizeNumber(data.loh, getLayOnHandsPool(), 0, getLayOnHandsPool());
         localStorage.setItem(STORAGE_KEYS.LOH, String(currentLOH));
         updateLOHDisplay();
         needsRender = true;
@@ -461,7 +493,7 @@ function initRealtimeSync() {
 
       // Sincroniza PO
       if (data.po !== undefined && data.po !== currentPO) {
-        currentPO = data.po;
+        currentPO = normalizeNumber(data.po, 0, 0, Number.POSITIVE_INFINITY);
         localStorage.setItem(STORAGE_KEYS.PO, String(currentPO));
         const inputPO = document.getElementById('input-po');
         if (inputPO) inputPO.value = currentPO;
@@ -470,7 +502,7 @@ function initRealtimeSync() {
 
       // Sincroniza Inventário
       if (data.inventory !== undefined && JSON.stringify(data.inventory) !== JSON.stringify(currentInventory)) {
-        currentInventory = data.inventory;
+        currentInventory = normalizeArray(data.inventory, []);
         localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(currentInventory));
         renderInventory();
         needsRender = true;
@@ -698,21 +730,61 @@ function renderSpellSlots() {
     <label class="spell-slot">
       <input type="checkbox"
              ${available ? 'checked' : ''}
-             data-slot-index="${i}"
+             disabled
              aria-label="Espaço de Magia ${i + 1}" />
       <div class="spell-slot__visual">✦</div>
     </label>
   `).join('');
 
-  // Adiciona listeners para salvar estado quando o checkbox mudar
-  container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', (e) => {
-      const index = parseInt(e.target.dataset.slotIndex, 10);
-      currentSlots[index] = e.target.checked;
-      // Salva o novo estado dos slots no localStorage
-      saveSlots(currentSlots);
-    });
+  updateSpellUseButtons();
+}
+
+/**
+ * Insere e atualiza os botões de gasto rápido de espaço de magia.
+ */
+function updateSpellUseButtons() {
+  const spellTagsList = document.querySelectorAll('.accordion-item--spell .spell-tags');
+  if (!spellTagsList.length) return;
+
+  const hasAvailableSlot = currentSlots.some(Boolean);
+
+  spellTagsList.forEach((container) => {
+    let button = container.querySelector('.spell-use-btn');
+
+    if (!button) {
+      button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'spell-use-btn';
+      button.dataset.slotLevel = '1';
+      button.innerHTML = '<span class="spell-use-btn__icon">✦</span><span class="spell-use-btn__text">Gastar</span>';
+      container.appendChild(button);
+    }
+
+    button.disabled = !hasAvailableSlot;
+    button.title = hasAvailableSlot ? 'Gastar 1 espaço de magia de 1º círculo' : 'Sem espaços de magia disponíveis';
+    button.setAttribute('aria-label', button.title);
   });
+
+  document.querySelectorAll('.spell-use-btn').forEach((button) => {
+    button.disabled = !hasAvailableSlot;
+    button.title = hasAvailableSlot ? 'Gastar 1 espaço de magia de 1º círculo' : 'Sem espaços de magia disponíveis';
+    button.setAttribute('aria-label', button.title);
+  });
+}
+
+/**
+ * Consome 1 espaço de magia disponível.
+ */
+function spendSpellSlot(level = 1) {
+  if (level !== 1) return false;
+
+  const slotIndex = currentSlots.findIndex((available) => available);
+  if (slotIndex === -1) return false;
+
+  currentSlots[slotIndex] = false;
+  saveSlots(currentSlots);
+  renderSpellSlots();
+  return true;
 }
 
 
@@ -973,7 +1045,7 @@ function renderDerivedValues() {
     const halfLvl = Math.floor(CHAR.level / 2);
     preparedCount.textContent = count;
     if (preparedFormula) {
-      preparedFormula.textContent = `CAR(+${chaMod}) + metade nível(${halfLvl}) = ${count}`;
+      preparedFormula.innerHTML = `CAR(+${chaMod}) +<br>metade nível(${halfLvl}) = ${count}`;
     }
   }
 
@@ -1197,6 +1269,26 @@ function initEventListeners() {
     });
   });
 
+  // ── GASTO RÁPIDO DE ESPAÇO DE MAGIA ─────────────────────
+  document.querySelectorAll('.spell-use-btn').forEach((button) => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const slotLevel = parseInt(e.currentTarget.dataset.slotLevel, 10) || 1;
+      const spent = spendSpellSlot(slotLevel);
+
+      if (!spent) {
+        e.currentTarget.classList.add('spell-use-btn--shake');
+        setTimeout(() => e.currentTarget.classList.remove('spell-use-btn--shake'), 250);
+        return;
+      }
+
+      e.currentTarget.classList.add('spell-use-btn--spent');
+      setTimeout(() => e.currentTarget.classList.remove('spell-use-btn--spent'), 220);
+    });
+  });
+
   // ── INVENTÁRIO & PO ──────────────────────────────────────
   const inputPO = document.getElementById('input-po');
   if (inputPO) {
@@ -1237,6 +1329,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSpellSlots();
   renderInventory();
   renderDerivedValues();
+  updateSpellUseButtons();
 
   // Exibe o HP carregado do localStorage
   updateHPDisplay();
