@@ -200,7 +200,9 @@ const STORAGE_KEYS = {
   CHANNEL_DIV: 'dnd_percival_channel_div', // Estado do Canalizar Divindade (boolean)
   LOH: 'dnd_percival_loh',                 // Pontos atuais de Cura pelas Mãos (number)
   PO: 'dnd_percival_po',                   // Moedas de ouro (number)
-  INVENTORY: 'dnd_percival_inventory'       // Lista de itens do inventário (array de strings)
+  INVENTORY: 'dnd_percival_inventory',     // Lista de itens do inventário (array de strings)
+  BUFF_BENCAO: 'dnd_percival_buff_bencao', // Buff Bênção de Sangue ativo (boolean)
+  BUFF_MARCA: 'dnd_percival_buff_marca'    // Buff Marca do Caçador ativo (boolean)
 };
 
 function normalizeNumber(value, fallback, min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY) {
@@ -398,6 +400,29 @@ let currentLOH = loadLOH();
 let currentPO = loadPO();
 let currentInventory = loadInventory();
 
+// ── BUFFS ATIVOS ─────────────────────────────────────────────
+let buffBencaoActive = loadBuffState(STORAGE_KEYS.BUFF_BENCAO);
+let buffMarcaActive = loadBuffState(STORAGE_KEYS.BUFF_MARCA);
+
+/** Carrega estado de um buff do localStorage */
+function loadBuffState(key) {
+  const saved = localStorage.getItem(key);
+  return saved === 'true';
+}
+
+/** Salva estado de um buff no localStorage e sincroniza com Firestore */
+async function saveBuffState(key, value) {
+  localStorage.setItem(key, value ? 'true' : 'false');
+  if (syncEnabled && db) {
+    try {
+      const field = key === STORAGE_KEYS.BUFF_BENCAO ? 'buffBencao' : 'buffMarca';
+      await updateDoc(doc(db, "characters", "percival"), { [field]: value });
+    } catch (e) {
+      console.error("Erro ao sincronizar buff no Firestore:", e);
+    }
+  }
+}
+
 
 // ── SINCRONIZAÇÃO EM NUVEM (FIREBASE) & LOGICA DE INVENTÁRIO ──
 
@@ -415,6 +440,8 @@ async function syncStateToFirestore(forceUpload = false) {
       loh: normalizeNumber(currentLOH, getLayOnHandsPool(), 0, getLayOnHandsPool()),
       po: normalizeNumber(currentPO, 0, 0, Number.POSITIVE_INFINITY),
       inventory: normalizeArray(currentInventory, []),
+      buffBencao: buffBencaoActive,
+      buffMarca: buffMarcaActive,
       updatedAt: new Date().toISOString()
     };
     await setDoc(docRef, dataToSave, { merge: true });
@@ -505,6 +532,22 @@ function initRealtimeSync() {
         currentInventory = normalizeArray(data.inventory, []);
         localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(currentInventory));
         renderInventory();
+        needsRender = true;
+      }
+
+      // Sincroniza Buffs Ativos
+      if (data.buffBencao !== undefined && data.buffBencao !== buffBencaoActive) {
+        buffBencaoActive = normalizeBoolean(data.buffBencao, false);
+        localStorage.setItem(STORAGE_KEYS.BUFF_BENCAO, buffBencaoActive ? 'true' : 'false');
+        updateBuffToggleUI();
+        renderWeapons();
+        needsRender = true;
+      }
+      if (data.buffMarca !== undefined && data.buffMarca !== buffMarcaActive) {
+        buffMarcaActive = normalizeBoolean(data.buffMarca, false);
+        localStorage.setItem(STORAGE_KEYS.BUFF_MARCA, buffMarcaActive ? 'true' : 'false');
+        updateBuffToggleUI();
+        renderWeapons();
         needsRender = true;
       }
 
@@ -664,17 +707,39 @@ function renderAttributes() {
   }).join('');
 }
 
-/** Renderiza os cards de armas com cálculos automáticos */
+/** Renderiza os cards de armas com cálculos automáticos (buff-aware) */
 function renderWeapons() {
   const list = document.getElementById('weapons-list');
   const profBonus = getProficiencyBonus(CHAR.level);
+  const chaMod = getModifier(CHAR.attributes.CAR);
 
   list.innerHTML = CHAR.weapons.map(weapon => {
-    const atkBonus = getAttackBonus(weapon);
+    let atkBonus = getAttackBonus(weapon);
     const dmgMod = getDamageModifier(weapon);
-    const atkSign = atkBonus >= 0 ? '+' : '';
-    const dmgSign = dmgMod >= 0 ? '+' : '';
     const modName = weapon.abilityMod === 'FOR' ? 'FOR' : 'DES';
+    const baseMod = getModifier(CHAR.attributes[weapon.abilityMod]);
+    const baseDmgSign = dmgMod >= 0 ? '+' : '';
+
+    // ── Bênção de Sangue: adiciona CAR ao ataque da alabarda
+    const isAlabardaPrincipal = weapon.name === 'Alabarda';
+    let atkBuffed = false;
+    let atkFormulaExtra = '';
+    if (buffBencaoActive && isAlabardaPrincipal) {
+      atkBonus += chaMod;
+      atkBuffed = true;
+      atkFormulaExtra = ` + CAR(+${chaMod})`;
+    }
+
+    const atkSign = atkBonus >= 0 ? '+' : '';
+    const atkClass = atkBuffed ? 'weapon-stat__value weapon-stat__value--atk weapon-stat__value--atk-buffed' : 'weapon-stat__value weapon-stat__value--atk';
+
+    // ── Marca do Caçador: adiciona +1d6 ao dano da alabarda
+    let bonusDamageHTML = '';
+    let dmgFormulaExtra = '';
+    if (buffMarcaActive && isAlabardaPrincipal) {
+      bonusDamageHTML = ' <span class="weapon-stat__bonus-damage">+1d6</span>';
+      dmgFormulaExtra = ' + Marca(1d6)';
+    }
 
     return `
       <div class="weapon-card">
@@ -685,13 +750,13 @@ function renderWeapons() {
         <div class="weapon-card__stats">
           <div class="weapon-stat">
             <div class="weapon-stat__label">Ataque</div>
-            <div class="weapon-stat__value weapon-stat__value--atk">${atkSign}${atkBonus}</div>
-            <span class="weapon-stat__formula">Prof(+${profBonus}) + ${modName}(${dmgSign}${getModifier(CHAR.attributes[weapon.abilityMod])})</span>
+            <div class="${atkClass}">${atkSign}${atkBonus}</div>
+            <span class="weapon-stat__formula">Prof(+${profBonus}) + ${modName}(${baseDmgSign}${baseMod})${atkFormulaExtra}</span>
           </div>
           <div class="weapon-stat">
             <div class="weapon-stat__label">Dano</div>
-            <div class="weapon-stat__value">${weapon.damageDice}${dmgSign}${dmgMod}</div>
-            <span class="weapon-stat__formula">${weapon.damageDice} + mod. ${modName}</span>
+            <div class="weapon-stat__value">${weapon.damageDice}${baseDmgSign}${dmgMod}${bonusDamageHTML}</div>
+            <span class="weapon-stat__formula">${weapon.damageDice} + mod. ${modName}${dmgFormulaExtra}</span>
           </div>
         </div>
       </div>
@@ -894,6 +959,14 @@ function longRest() {
   currentLOH = getLayOnHandsPool();
   saveLOH(currentLOH);
   updateLOHDisplay();
+
+  // Desativa buffs ativos no descanso
+  buffBencaoActive = false;
+  buffMarcaActive = false;
+  saveBuffState(STORAGE_KEYS.BUFF_BENCAO, false);
+  saveBuffState(STORAGE_KEYS.BUFF_MARCA, false);
+  updateBuffToggleUI();
+  renderWeapons();
 
   // Animação de brilho dourado no botão de descanso
   const btn = document.getElementById('btn-long-rest');
@@ -1262,6 +1335,9 @@ function initEventListeners() {
     });
   }
 
+  // ── BUFFS ATIVOS (Toggle Buttons) ───────────────────────
+  initBuffToggles();
+
   // ── NAVEGAÇÃO POR ABAS ──────────────────────────────────
   document.querySelectorAll('.bottom-nav__tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -1313,6 +1389,82 @@ function initEventListeners() {
         if (inputDesc) inputDesc.value = '';
         inputItem.focus();
       }
+    });
+  }
+}
+
+
+// ── SISTEMA DE BUFFS ATIVOS ──────────────────────────────────
+
+/**
+ * Atualiza o visual dos botões de buff conforme o estado.
+ */
+function updateBuffToggleUI() {
+  const btnBencao = document.getElementById('buff-bencao-sangue');
+  const btnMarca = document.getElementById('buff-marca-cacador');
+  if (btnBencao) btnBencao.setAttribute('aria-pressed', String(buffBencaoActive));
+  if (btnMarca) btnMarca.setAttribute('aria-pressed', String(buffMarcaActive));
+}
+
+/**
+ * Inicializa os event listeners dos botões de buff.
+ */
+function initBuffToggles() {
+  const btnBencao = document.getElementById('buff-bencao-sangue');
+  const btnMarca = document.getElementById('buff-marca-cacador');
+
+  // Restaura estado visual dos buffs
+  updateBuffToggleUI();
+
+  // ── Bênção de Sangue (Canalizar Divindade) ──────────────
+  if (btnBencao) {
+    btnBencao.addEventListener('click', () => {
+      const newState = !buffBencaoActive;
+
+      if (newState) {
+        // Verifica se tem Canalizar Divindade disponível
+        if (!channelDivAvailable) {
+          btnBencao.classList.add('buff-toggle--shake');
+          setTimeout(() => btnBencao.classList.remove('buff-toggle--shake'), 250);
+          return;
+        }
+        
+        // Lógica bônus: desconta Canalizar Divindade automaticamente
+        channelDivAvailable = false;
+        saveChannelDivinity(channelDivAvailable);
+        const cbCD = document.getElementById('checkbox-channel-divinity');
+        if (cbCD) cbCD.checked = false;
+      }
+
+      buffBencaoActive = newState;
+      saveBuffState(STORAGE_KEYS.BUFF_BENCAO, newState);
+      updateBuffToggleUI();
+      renderWeapons();
+    });
+  }
+
+  // ── Marca do Caçador (Espaço de Magia 1º Círculo) ───────
+  if (btnMarca) {
+    btnMarca.addEventListener('click', () => {
+      const newState = !buffMarcaActive;
+
+      if (newState) {
+        // Verifica se tem espaço de magia disponível
+        const hasSlot = currentSlots.some(Boolean);
+        if (!hasSlot) {
+          btnMarca.classList.add('buff-toggle--shake');
+          setTimeout(() => btnMarca.classList.remove('buff-toggle--shake'), 250);
+          return;
+        }
+
+        // Lógica bônus: desconta 1 espaço de magia de 1º círculo
+        spendSpellSlot(1);
+      }
+
+      buffMarcaActive = newState;
+      saveBuffState(STORAGE_KEYS.BUFF_MARCA, newState);
+      updateBuffToggleUI();
+      renderWeapons();
     });
   }
 }

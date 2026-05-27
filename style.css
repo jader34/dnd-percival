@@ -497,6 +497,179 @@ body::before {
   font-weight: 500;
 }
 
+/* ── ACTIVE BUFFS (Toggle System) ────────────────────────── */
+.active-buffs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.buff-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  -webkit-user-select: none;
+  user-select: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  text-align: left;
+}
+
+.buff-toggle:active {
+  transform: scale(0.98);
+}
+
+.buff-toggle--shake {
+  animation: shake 0.25s ease;
+}
+
+.buff-toggle__icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  transition: filter 0.3s ease;
+}
+
+.buff-toggle__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.buff-toggle__name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.buff-toggle__detail {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: color 0.3s ease;
+}
+
+/* Toggle switch indicator */
+.buff-toggle__indicator {
+  flex-shrink: 0;
+}
+
+.buff-toggle__track {
+  width: 38px;
+  height: 20px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.buff-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* ── Bênção de Sangue — Active State (Blood Red) */
+#buff-bencao-sangue[aria-pressed="true"] {
+  border-color: rgba(190, 30, 45, 0.4);
+  background: rgba(190, 30, 45, 0.08);
+  box-shadow:
+    0 0 12px rgba(190, 30, 45, 0.15),
+    inset 0 0 12px rgba(190, 30, 45, 0.04);
+}
+
+#buff-bencao-sangue[aria-pressed="true"] .buff-toggle__name {
+  color: #e63946;
+  text-shadow: 0 0 8px rgba(230, 57, 70, 0.5);
+}
+
+#buff-bencao-sangue[aria-pressed="true"] .buff-toggle__detail {
+  color: rgba(230, 57, 70, 0.7);
+}
+
+#buff-bencao-sangue[aria-pressed="true"] .buff-toggle__track {
+  background: rgba(190, 30, 45, 0.35);
+  border-color: rgba(230, 57, 70, 0.5);
+}
+
+#buff-bencao-sangue[aria-pressed="true"] .buff-toggle__thumb {
+  left: 20px;
+  background: #e63946;
+  box-shadow: 0 0 6px rgba(230, 57, 70, 0.6);
+}
+
+/* ── Marca do Caçador — Active State (Hunter Green) */
+#buff-marca-cacador[aria-pressed="true"] {
+  border-color: rgba(46, 184, 93, 0.35);
+  background: rgba(46, 184, 93, 0.06);
+  box-shadow:
+    0 0 12px rgba(46, 184, 93, 0.12),
+    inset 0 0 12px rgba(46, 184, 93, 0.03);
+}
+
+#buff-marca-cacador[aria-pressed="true"] .buff-toggle__name {
+  color: #2eb85d;
+  text-shadow: 0 0 8px rgba(46, 184, 93, 0.45);
+}
+
+#buff-marca-cacador[aria-pressed="true"] .buff-toggle__detail {
+  color: rgba(46, 184, 93, 0.7);
+}
+
+#buff-marca-cacador[aria-pressed="true"] .buff-toggle__track {
+  background: rgba(46, 184, 93, 0.3);
+  border-color: rgba(46, 184, 93, 0.5);
+}
+
+#buff-marca-cacador[aria-pressed="true"] .buff-toggle__thumb {
+  left: 20px;
+  background: #2eb85d;
+  box-shadow: 0 0 6px rgba(46, 184, 93, 0.6);
+}
+
+/* ── Weapon Card Buff Styles ─────────────────────────────── */
+.weapon-stat__value--atk-buffed {
+  color: #e63946 !important;
+  text-shadow: 0 0 8px rgba(230, 57, 70, 0.5);
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.weapon-stat__bonus-damage {
+  color: #2eb85d;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-shadow: 0 0 6px rgba(46, 184, 93, 0.35);
+  animation: buffFadeIn 0.3s ease;
+}
+
+@keyframes buffFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* ── QUICK ABILITY ────────────────────────────────────────── */
 .card {
   background: var(--bg-card);
@@ -1762,4 +1935,81 @@ body::before {
 
 .skill-item--trained .skill-item__modifier {
   color: var(--gold-bright);
+}
+
+/* -- ACTIVE BUFFS ------------------------------------------- */
+.active-buffs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.btn-buff {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.btn-buff:active {
+  transform: scale(0.96);
+}
+
+.btn-buff[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-buff[aria-pressed="true"]#btn-buff-blood {
+  border-color: #8a0303;
+  box-shadow: 0 0 10px rgba(138, 3, 3, 0.3) inset, 0 0 10px rgba(138, 3, 3, 0.2);
+}
+
+.btn-buff[aria-pressed="true"]#btn-buff-hunter {
+  border-color: #2e8b57;
+  box-shadow: 0 0 10px rgba(46, 139, 87, 0.3) inset, 0 0 10px rgba(46, 139, 87, 0.2);
+}
+
+.buff-icon {
+  font-size: 1.6rem;
+}
+
+.buff-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.buff-name small {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* -- WEAPON GLOW STATES ------------------------------------- */
+.glow-blood {
+  border-color: #8a0303 !important;
+  box-shadow: 0 0 15px rgba(138, 3, 3, 0.4), inset 0 0 10px rgba(138, 3, 3, 0.2);
+}
+
+.glow-hunter {
+  border-color: #2e8b57 !important;
+  box-shadow: 0 0 15px rgba(46, 139, 87, 0.4), inset 0 0 10px rgba(46, 139, 87, 0.2);
+}
+
+.glow-combo {
+  border-top-color: #8a0303 !important;
+  border-left-color: #8a0303 !important;
+  border-bottom-color: #2e8b57 !important;
+  border-right-color: #2e8b57 !important;
+  box-shadow: -6px -6px 15px rgba(138, 3, 3, 0.4), 6px 6px 15px rgba(46, 139, 87, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.1);
 }

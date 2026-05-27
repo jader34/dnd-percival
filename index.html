@@ -78,6 +78,36 @@
 
       <!-- Habilidade Rápida -->
       <h2 class="section-title">✨ Habilidades Rápidas</h2>
+
+      <!-- Buffs Ativos (Toggle Buttons) -->
+      <div class="active-buffs">
+        <button type="button" class="buff-toggle" id="buff-bencao-sangue" aria-pressed="false" title="Canalizar Divindade — Bênção de Sangue: adiciona mod. CAR ao ataque">
+          <span class="buff-toggle__icon">🗡️</span>
+          <div class="buff-toggle__info">
+            <span class="buff-toggle__name">Bênção de Sangue</span>
+            <span class="buff-toggle__detail">+CAR no Ataque</span>
+          </div>
+          <div class="buff-toggle__indicator">
+            <div class="buff-toggle__track">
+              <div class="buff-toggle__thumb"></div>
+            </div>
+          </div>
+        </button>
+
+        <button type="button" class="buff-toggle" id="buff-marca-cacador" aria-pressed="false" title="Marca do Caçador: adiciona +1d6 ao dano da alabarda">
+          <span class="buff-toggle__icon">🎯</span>
+          <div class="buff-toggle__info">
+            <span class="buff-toggle__name">Marca do Caçador</span>
+            <span class="buff-toggle__detail">+1d6 no Dano</span>
+          </div>
+          <div class="buff-toggle__indicator">
+            <div class="buff-toggle__track">
+              <div class="buff-toggle__thumb"></div>
+            </div>
+          </div>
+        </button>
+      </div>
+
       <div class="quick-ability card card--glow">
         <div class="quick-ability__header">
           <span class="quick-ability__icon">☀️</span>
