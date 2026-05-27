@@ -5,7 +5,7 @@
 
 // ── INTEGRAÇÃO COM FIREBASE & SYNC EM TEMPO REAL ─────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, onSnapshot, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, initializeFirestore, doc, onSnapshot, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Configurações do Firebase Console. Substitua com os dados do seu projeto.
 const firebaseConfig = {
@@ -202,7 +202,8 @@ const STORAGE_KEYS = {
   PO: 'dnd_percival_po',                   // Moedas de ouro (number)
   INVENTORY: 'dnd_percival_inventory',     // Lista de itens do inventário (array de strings)
   BUFF_BENCAO: 'dnd_percival_buff_bencao', // Buff Bênção de Sangue ativo (boolean)
-  BUFF_MARCA: 'dnd_percival_buff_marca'    // Buff Marca do Caçador ativo (boolean)
+  BUFF_MARCA: 'dnd_percival_buff_marca',   // Buff Marca do Caçador ativo (boolean)
+  AC: 'dnd_percival_ac'                    // Classe de armadura (number)
 };
 
 function normalizeNumber(value, fallback, min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY) {
@@ -391,9 +392,32 @@ function loadInventory() {
   }
 }
 
+/**
+ * Salva a Classe de Armadura (CA) e sincroniza com o Firestore
+ */
+async function saveAC(value) {
+  const safeValue = normalizeNumber(value, CHAR.armorClassBase, 1, 99);
+  localStorage.setItem(STORAGE_KEYS.AC, String(safeValue));
+  if (syncEnabled && db) {
+    try {
+      await updateDoc(doc(db, "characters", "percival"), { ac: safeValue });
+    } catch (e) {
+      console.error("Erro ao sincronizar CA no Firestore:", e);
+    }
+  }
+}
+
+function loadAC() {
+  const saved = localStorage.getItem(STORAGE_KEYS.AC);
+  if (saved === null) return CHAR.armorClassBase;
+  const parsed = parseInt(saved, 10);
+  if (isNaN(parsed)) return CHAR.armorClassBase;
+  return Math.max(1, Math.min(parsed, 99));
+}
 
 // ── ESTADO DO APP ────────────────────────────────────────────
 let currentHP = loadHP();
+let currentAC = loadAC();
 let currentSlots = loadSlots();
 let channelDivAvailable = loadChannelDivinity();
 let currentLOH = loadLOH();
@@ -440,6 +464,7 @@ async function syncStateToFirestore(forceUpload = false) {
       loh: normalizeNumber(currentLOH, getLayOnHandsPool(), 0, getLayOnHandsPool()),
       po: normalizeNumber(currentPO, 0, 0, Number.POSITIVE_INFINITY),
       inventory: normalizeArray(currentInventory, []),
+      ac: normalizeNumber(currentAC, CHAR.armorClassBase, 1, 99),
       buffBencao: buffBencaoActive,
       buffMarca: buffMarcaActive,
       updatedAt: new Date().toISOString()
@@ -462,7 +487,10 @@ function initRealtimeSync() {
 
   try {
     const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
+    // Usa initializeFirestore com fallback forçado de long polling para evitar erros de transporte 400 em algumas redes
+    db = initializeFirestore(app, {
+      experimentalForceLongPolling: true
+    });
     syncEnabled = true;
     console.log("🔥 Firebase inicializado com sucesso!");
 
@@ -548,6 +576,13 @@ function initRealtimeSync() {
         localStorage.setItem(STORAGE_KEYS.BUFF_MARCA, buffMarcaActive ? 'true' : 'false');
         updateBuffToggleUI();
         renderWeapons();
+        needsRender = true;
+      }
+
+      // Sincroniza CA
+      if (data.ac !== undefined && data.ac !== currentAC) {
+        currentAC = normalizeNumber(data.ac, CHAR.armorClassBase, 1, 99);
+        localStorage.setItem(STORAGE_KEYS.AC, String(currentAC));
         needsRender = true;
       }
 
@@ -1088,7 +1123,7 @@ function renderDerivedValues() {
   renderSkillsAndSaves();
 
   // CA (Classe de Armadura)
-  document.getElementById('display-ac').textContent = CHAR.armorClassBase;
+  document.getElementById('display-ac').textContent = currentAC;
 
   // Imposição de Mãos pool maximo
   const layOnHandsMax = document.getElementById('display-lay-on-hands');
@@ -1208,6 +1243,56 @@ function confirmHPModal() {
   closeHPModal();
 }
 
+// ── AC MODAL (Editar Classe de Armadura) ────────────────────────
+function getACModalElements() {
+  return {
+    overlay: document.getElementById('ac-modal'),
+    input: document.getElementById('ac-modal-input'),
+    btnOk: document.getElementById('ac-modal-confirm'),
+    btnCancel: document.getElementById('ac-modal-cancel')
+  };
+}
+
+function openACModal() {
+  const m = getACModalElements();
+  m.input.value = currentAC;
+  m.overlay.classList.add('active');
+  m.overlay.setAttribute('aria-hidden', 'false');
+  setTimeout(() => {
+    m.input.focus();
+    m.input.select();
+  }, 200);
+}
+
+function closeACModal() {
+  const m = getACModalElements();
+  m.overlay.classList.remove('active');
+  m.overlay.setAttribute('aria-hidden', 'true');
+}
+
+function confirmACModal() {
+  const m = getACModalElements();
+  const value = parseInt(m.input.value, 10);
+  
+  if (isNaN(value) || value <= 0) {
+    closeACModal();
+    return;
+  }
+  
+  currentAC = value;
+  saveAC(currentAC);
+  renderDerivedValues();
+  
+  // Feedback visual
+  const acValueEl = document.getElementById('display-ac');
+  if (acValueEl) {
+    acValueEl.classList.remove('hp-pulse');
+    void acValueEl.offsetWidth; // trigger reflow
+    acValueEl.classList.add('hp-pulse');
+  }
+  
+  closeACModal();
+}
 
 // ── EVENT LISTENERS ──────────────────────────────────────────
 
@@ -1287,6 +1372,45 @@ function initEventListeners() {
   }, { passive: false });
   btnPlus.addEventListener('touchcancel', cancelHold);
 
+  // ── AC BOX (Editar CA ao segurar) ───────────────────────
+  const acBox = document.getElementById('ac-box');
+  if (acBox) {
+    let holdTimeoutAC = null;
+    let holdFiredAC = false;
+
+    function startHoldAC() {
+      holdFiredAC = false;
+      holdTimeoutAC = setTimeout(() => {
+        holdFiredAC = true;
+        openACModal();
+      }, 500);
+    }
+
+    function cancelHoldAC() {
+      clearTimeout(holdTimeoutAC);
+      holdTimeoutAC = null;
+    }
+
+    acBox.addEventListener('mousedown', startHoldAC);
+    acBox.addEventListener('mouseup', () => {
+      cancelHoldAC();
+      if (!holdFiredAC) {
+        // Opcional: fazer algo no clique simples, se desejar
+      }
+    });
+    acBox.addEventListener('mouseleave', cancelHoldAC);
+
+    acBox.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startHoldAC();
+    }, { passive: false });
+    acBox.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      cancelHoldAC();
+    }, { passive: false });
+    acBox.addEventListener('touchcancel', cancelHoldAC);
+  }
+
   // ── BOTÕES CURA PELAS MÃOS ──────────────────────────────
   const btnLohMinus = document.getElementById('btn-loh-minus');
   const btnLohPlus = document.getElementById('btn-loh-plus');
@@ -1310,6 +1434,24 @@ function initEventListeners() {
     } else if (e.key === 'Escape') {
       e.preventDefault();
       closeHPModal();
+    }
+  });
+
+  // ── MODAL CA: Botões e atalhos ─────────────────────────────
+  document.getElementById('ac-modal-confirm').addEventListener('click', confirmACModal);
+  document.getElementById('ac-modal-cancel').addEventListener('click', closeACModal);
+
+  document.getElementById('ac-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeACModal();
+  });
+
+  document.getElementById('ac-modal-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      confirmACModal();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      closeACModal();
     }
   });
 

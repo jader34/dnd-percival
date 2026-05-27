@@ -31,7 +31,7 @@
 
     <div class="header__stats">
       <!-- CA -->
-      <div class="header__ac">
+      <div class="header__ac" id="ac-box" style="cursor: pointer;" title="Segure para editar a CA">
         <span class="header__ac-label">CA</span>
         <span class="header__ac-value" id="display-ac"></span>
       </div>
@@ -858,6 +858,29 @@
       <div class="modal__actions">
         <button class="modal__btn modal__btn--cancel" id="hp-modal-cancel">Cancelar</button>
         <button class="modal__btn modal__btn--confirm" id="hp-modal-confirm">Aplicar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ MODAL AC INPUT ═══════════════ -->
+  <div class="modal-overlay" id="ac-modal" aria-hidden="true">
+    <div class="modal">
+      <div class="modal__header">
+        <span class="modal__icon">🛡️</span>
+        <h2 class="modal__title">Editar CA</h2>
+      </div>
+      <p class="modal__hint">Informe o novo valor da sua Classe de Armadura.</p>
+      <input
+        type="number"
+        class="modal__input"
+        id="ac-modal-input"
+        min="1"
+        placeholder="Ex: 17"
+        inputmode="numeric"
+      />
+      <div class="modal__actions">
+        <button class="modal__btn modal__btn--cancel" id="ac-modal-cancel">Cancelar</button>
+        <button class="modal__btn modal__btn--confirm" id="ac-modal-confirm">Salvar</button>
       </div>
     </div>
   </div>
