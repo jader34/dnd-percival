@@ -469,6 +469,7 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
 }
 
@@ -487,6 +488,8 @@ body::before {
   background: var(--gold-bg);
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-pill);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .weapon-card__stats {
