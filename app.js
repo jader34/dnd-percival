@@ -90,7 +90,7 @@ const CHAR = {
       properties: 'Pesada, Alcance'
     },
     {
-      name: 'Alabarda (Ação Bônus)',
+      name: 'Alabarda (Bônus)',
       type: 'Corpo a Corpo (3m)',
       abilityMod: 'FOR',
       damageDice: '1d4',
@@ -756,10 +756,10 @@ function renderWeapons() {
     const baseDmgSign = dmgMod >= 0 ? '+' : '';
 
     // ── Bênção de Sangue: adiciona CAR ao ataque da alabarda
-    const isAlabardaPrincipal = weapon.name === 'Alabarda';
+    const isAlabarda = weapon.name.includes('Alabarda');
     let atkBuffed = false;
     let atkFormulaExtra = '';
-    if (buffBencaoActive && isAlabardaPrincipal) {
+    if (buffBencaoActive && isAlabarda) {
       atkBonus += chaMod;
       atkBuffed = true;
       atkFormulaExtra = ` + CAR(+${chaMod})`;
@@ -771,23 +771,13 @@ function renderWeapons() {
     // ── Marca do Caçador: adiciona +1d6 ao dano da alabarda
     let bonusDamageHTML = '';
     let dmgFormulaExtra = '';
-    if (buffMarcaActive && isAlabardaPrincipal) {
+    if (buffMarcaActive && isAlabarda) {
       bonusDamageHTML = ' <span class="weapon-stat__bonus-damage">+1d6</span>';
       dmgFormulaExtra = ' + Marca(1d6)';
     }
 
     // ── Efeitos de Brilho Dinâmico (Glow Effects) com base nos buffs ativos
-    const isAlabarda = weapon.name.includes('Alabarda');
     let glowClass = '';
-    if (isAlabarda) {
-      if (buffBencaoActive && buffMarcaActive) {
-        glowClass = ' glow-combo';
-      } else if (buffBencaoActive) {
-        glowClass = ' glow-blood';
-      } else if (buffMarcaActive) {
-        glowClass = ' glow-hunter';
-      }
-    }
 
     return `
       <div class="weapon-card${glowClass}">
@@ -1510,13 +1500,13 @@ function initEventListeners() {
       const spent = spendSpellSlot(slotLevel);
 
       if (!spent) {
-        e.currentTarget.classList.add('spell-use-btn--shake');
-        setTimeout(() => e.currentTarget.classList.remove('spell-use-btn--shake'), 250);
+        button.classList.add('spell-use-btn--shake');
+        setTimeout(() => button.classList.remove('spell-use-btn--shake'), 250);
         return;
       }
 
-      e.currentTarget.classList.add('spell-use-btn--spent');
-      setTimeout(() => e.currentTarget.classList.remove('spell-use-btn--spent'), 220);
+      button.classList.add('spell-use-btn--spent');
+      setTimeout(() => button.classList.remove('spell-use-btn--spent'), 220);
     });
   });
 

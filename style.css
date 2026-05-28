@@ -467,7 +467,7 @@ body::before {
 
 .weapon-card__header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
@@ -477,6 +477,7 @@ body::before {
   font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .weapon-card__type {
@@ -490,6 +491,7 @@ body::before {
   border-radius: var(--radius-pill);
   flex-shrink: 0;
   white-space: nowrap;
+  margin-top: 2px;
 }
 
 .weapon-card__stats {
@@ -1811,7 +1813,7 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-md);
 }
 
 .inventory-form-row {
@@ -1843,7 +1845,6 @@ body::before {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   overflow: hidden;
-  margin-bottom: var(--spacing-sm);
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
