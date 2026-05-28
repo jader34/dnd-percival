@@ -729,8 +729,8 @@ function renderAttributes() {
 
   grid.innerHTML = Object.entries(CHAR.attributes).map(([key, score]) => {
     const mod = getModifier(score);
-    // Classes CSS: positivo mostra "+" dourado via ::before, zero fica cinza, negativo fica padrão
-    const modClass = mod > 0 ? 'attr-card__mod--positive' : (mod === 0 ? 'attr-card__mod--zero' : '');
+    // Classes CSS: positivo mostra "+" dourado, zero fica cinza, negativo fica vermelho com "-"
+    const modClass = mod > 0 ? 'attr-card__mod--positive' : (mod < 0 ? 'attr-card__mod--negative' : 'attr-card__mod--zero');
 
     return `
       <div class="attr-card">
@@ -776,8 +776,21 @@ function renderWeapons() {
       dmgFormulaExtra = ' + Marca(1d6)';
     }
 
+    // ── Efeitos de Brilho Dinâmico (Glow Effects) com base nos buffs ativos
+    const isAlabarda = weapon.name.includes('Alabarda');
+    let glowClass = '';
+    if (isAlabarda) {
+      if (buffBencaoActive && buffMarcaActive) {
+        glowClass = ' glow-combo';
+      } else if (buffBencaoActive) {
+        glowClass = ' glow-blood';
+      } else if (buffMarcaActive) {
+        glowClass = ' glow-hunter';
+      }
+    }
+
     return `
-      <div class="weapon-card">
+      <div class="weapon-card${glowClass}">
         <div class="weapon-card__header">
           <span class="weapon-card__name">${weapon.name}</span>
           <span class="weapon-card__type">${weapon.type}</span>
